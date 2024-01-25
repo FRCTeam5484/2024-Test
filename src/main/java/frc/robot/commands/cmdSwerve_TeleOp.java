@@ -1,8 +1,6 @@
 package frc.robot.commands;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.subSwerve;
@@ -12,17 +10,13 @@ public class cmdSwerve_TeleOp extends Command {
   private final DoubleSupplier XSupplier;
   private final DoubleSupplier YSupplier;
   private final DoubleSupplier rotationSupplier;
-  private final BooleanSupplier boost;
-  private final BooleanSupplier slow;
   private final SlewRateLimiter xLimiter, yLimiter, rotationLimiter;
 
-  public cmdSwerve_TeleOp(subSwerve swerve, DoubleSupplier XSupplier, DoubleSupplier YSupplier, DoubleSupplier rotationSupplier, BooleanSupplier boost, BooleanSupplier slow) {
+  public cmdSwerve_TeleOp(subSwerve swerve, DoubleSupplier XSupplier, DoubleSupplier YSupplier, DoubleSupplier rotationSupplier) {
     this.swerve = swerve;
     this.XSupplier = XSupplier;
     this.YSupplier = YSupplier;
     this.rotationSupplier = rotationSupplier;
-    this.boost = boost;
-    this.slow = slow;
     this.xLimiter = new SlewRateLimiter(3.5);
     this.yLimiter = new SlewRateLimiter(3.5);
     this.rotationLimiter = new SlewRateLimiter(4.5);
