@@ -2,14 +2,18 @@ package frc.robot.classes;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class swerveModule {
     private final CANcoder rotationEncoder;
@@ -21,21 +25,21 @@ public class swerveModule {
     private final RelativeEncoder turningEncoder;
 
     private final SparkPIDController drivingPIDController;
-    private final SparkPIDController turningPIDController;
+    private final PIDController turningPIDController;
 
     private double angularOffset = 0;
     private SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
     public swerveModule(int drivingCANId, int turningCANId, int canCoderId, double angularOffset) {
+        this.angularOffset = angularOffset;
         rotationEncoder = new CANcoder(canCoderId);
-            CANcoderConfiguration canCoderConfiguration = new CANcoderConfiguration();
-            canCoderConfiguration.MagnetSensor.MagnetOffset = angularOffset;
-            canCoderConfiguration.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-            //canCoderConfiguration.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue. AbsoluteSensorRange.Unsigned_0_to_360;
-            rotationEncoder.getConfigurator().apply(canCoderConfiguration);
-
+        CANcoderConfiguration canCoderConfiguration = new CANcoderConfiguration();
+        canCoderConfiguration.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+        //canCoderConfiguration.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+        rotationEncoder.getConfigurator().apply(canCoderConfiguration);
         rotationEncoder.getPosition().setUpdateFrequency(100);
         rotationEncoder.getVelocity().setUpdateFrequency(100);
+
         drivingSparkMax = new CANSparkMax(drivingCANId, MotorType.kBrushless);
         turningSparkMax = new CANSparkMax(turningCANId, MotorType.kBrushless);
 
@@ -44,34 +48,21 @@ public class swerveModule {
 
         drivingEncoder = drivingSparkMax.getEncoder();
         turningEncoder = turningSparkMax.getEncoder();
+
         drivingPIDController = drivingSparkMax.getPIDController();
-        turningPIDController = turningSparkMax.getPIDController();
         drivingPIDController.setFeedbackDevice(drivingEncoder);
-        turningPIDController.setFeedbackDevice(turningEncoder);
+
+        turningPIDController = new PIDController(moduleConstants.kTurningP, moduleConstants.kTurningI, moduleConstants.kTurningD);    
+        turningPIDController.enableContinuousInput(0, 360);    
 
         drivingEncoder.setPositionConversionFactor(moduleConstants.kDrivingEncoderPositionFactor);
         drivingEncoder.setVelocityConversionFactor(moduleConstants.kDrivingEncoderVelocityFactor);
-
-        turningEncoder.setPositionConversionFactor(moduleConstants.kTurningEncoderPositionFactor);
-        turningEncoder.setVelocityConversionFactor(moduleConstants.kTurningEncoderVelocityFactor);
-
-        //turningEncoder.setInverted(moduleConstants.kTurningEncoderInverted);
-
-        turningPIDController.setPositionPIDWrappingEnabled(true);
-        turningPIDController.setPositionPIDWrappingMinInput(moduleConstants.kTurningEncoderPositionPIDMinInput);
-        turningPIDController.setPositionPIDWrappingMaxInput(moduleConstants.kTurningEncoderPositionPIDMaxInput);
 
         drivingPIDController.setP(moduleConstants.kDrivingP);
         drivingPIDController.setI(moduleConstants.kDrivingI);
         drivingPIDController.setD(moduleConstants.kDrivingD);
         drivingPIDController.setFF(moduleConstants.kDrivingFF);
         drivingPIDController.setOutputRange(moduleConstants.kDrivingMinOutput, moduleConstants.kDrivingMaxOutput);
-
-        turningPIDController.setP(moduleConstants.kTurningP);
-        turningPIDController.setI(moduleConstants.kTurningI);
-        turningPIDController.setD(moduleConstants.kTurningD);
-        turningPIDController.setFF(moduleConstants.kTurningFF);
-        turningPIDController.setOutputRange(moduleConstants.kTurningMinOutput, moduleConstants.kTurningMaxOutput);
 
         drivingSparkMax.setIdleMode(moduleConstants.kDrivingMotorIdleMode);
         turningSparkMax.setIdleMode(moduleConstants.kTurningMotorIdleMode);
@@ -90,20 +81,13 @@ public class swerveModule {
     public SwerveModulePosition getPosition() {return new SwerveModulePosition(drivingEncoder.getPosition(), getRotation2d());}
     public double GetModuleAngle() { return rotationEncoder.getAbsolutePosition().getValueAsDouble(); }
     public void setDesiredState(SwerveModuleState desiredState) {
-        SwerveModuleState correctedDesiredState = new SwerveModuleState();
-        correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
-        correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(angularOffset));
-
-        SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState, getRotation2d());
-
+        SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(desiredState, getRotation2d());
         if(Math.abs(optimizedDesiredState.speedMetersPerSecond) < 0.01){
             stopModule();
             return;
         }
-
         drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
-        turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
-
+        turningSparkMax.set(turningPIDController.calculate(getAngle(), optimizedDesiredState.angle.getDegrees()));
         this.desiredState = desiredState;
     }
 
@@ -111,7 +95,7 @@ public class swerveModule {
         drivingEncoder.setPosition(0); turningEncoder.setPosition(0);
     }
     public double getAngle() { 
-        return rotationEncoder.getAbsolutePosition().getValueAsDouble(); 
+        return (rotationEncoder.getAbsolutePosition().getValueAsDouble() * 360) - angularOffset; 
     }
     public Rotation2d getRotation2d() { 
         return Rotation2d.fromDegrees(getAngle()); 

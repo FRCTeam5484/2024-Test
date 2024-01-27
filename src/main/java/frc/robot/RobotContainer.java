@@ -24,9 +24,9 @@ public class RobotContainer {
     swerve.setDefaultCommand(
       new cmdSwerve_TeleOp(
           swerve,
-          () -> MathUtil.applyDeadband(-driverOne.getLeftY(), 0.01),
+          () -> MathUtil.applyDeadband(driverOne.getLeftY(), 0.01),
           () -> MathUtil.applyDeadband(driverOne.getLeftX(), 0.01),
-          () -> MathUtil.applyDeadband(-driverOne.getRightX(), 0.01)));
+          () -> MathUtil.applyDeadband(driverOne.getRightX(), 0.01)));
   }
 
   private void addAutoOptions(){
