@@ -55,7 +55,7 @@ public class swerveModule {
         turningEncoder.setPositionConversionFactor(moduleConstants.kTurningEncoderPositionFactor);
         turningEncoder.setVelocityConversionFactor(moduleConstants.kTurningEncoderVelocityFactor);
 
-        turningEncoder.setInverted(moduleConstants.kTurningEncoderInverted);
+        //turningEncoder.setInverted(moduleConstants.kTurningEncoderInverted);
 
         turningPIDController.setPositionPIDWrappingEnabled(true);
         turningPIDController.setPositionPIDWrappingMinInput(moduleConstants.kTurningEncoderPositionPIDMinInput);
