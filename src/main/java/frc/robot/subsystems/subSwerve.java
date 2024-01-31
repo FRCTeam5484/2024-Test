@@ -24,10 +24,10 @@ import frc.robot.classes.swerveModule;
 
 public class subSwerve extends SubsystemBase {
   
-  public static final double kFrontLeftOffset = 16;
-  public static final double kFrontRightOffset = 107;
-  public static final double kRearLeftOffset = 312;
-  public static final double kRearRightOffset = 212;
+  public static final double kFrontLeftOffset = 36;
+  public static final double kFrontRightOffset = 106;
+  public static final double kRearLeftOffset = 0;
+  public static final double kRearRightOffset = 0;
 
   public static final int kFrontLeftDrivingCanId = 1;
   public static final int kFrontRightDrivingCanId = 3;
@@ -72,6 +72,7 @@ public class subSwerve extends SubsystemBase {
       } catch (Exception e) { }
     }).start();
 
+    /* 
     AutoBuilder.configureHolonomic(
                 this::getPose, // Robot pose supplier
                 this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
@@ -96,7 +97,7 @@ public class subSwerve extends SubsystemBase {
                     return false;
                 },
                 this // Reference to this subsystem to set requirements
-        );
+        );*/
   }
 
   public Pose2d getPose() { return odometry.getPoseMeters(); }
