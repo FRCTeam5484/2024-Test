@@ -27,15 +27,13 @@ public class swerveModule {
     private final SparkPIDController drivingPIDController;
     private final PIDController turningPIDController;
 
-    private double angularOffset = 0;
     private SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
     public swerveModule(int drivingCANId, int turningCANId, int canCoderId, double angularOffset) {
-        this.angularOffset = angularOffset;
         rotationEncoder = new CANcoder(canCoderId);
         CANcoderConfiguration canCoderConfiguration = new CANcoderConfiguration();
         canCoderConfiguration.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-        //canCoderConfiguration.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+        canCoderConfiguration.MagnetSensor.MagnetOffset = -angularOffset;
         rotationEncoder.getConfigurator().apply(canCoderConfiguration);
         rotationEncoder.getPosition().setUpdateFrequency(100);
         rotationEncoder.getVelocity().setUpdateFrequency(100);
@@ -72,7 +70,6 @@ public class swerveModule {
         drivingSparkMax.burnFlash();
         turningSparkMax.burnFlash();
 
-        this.angularOffset = angularOffset;
         desiredState.angle = new Rotation2d(turningEncoder.getPosition());
         drivingEncoder.setPosition(0);
     }
@@ -95,7 +92,10 @@ public class swerveModule {
         drivingEncoder.setPosition(0); turningEncoder.setPosition(0);
     }
     public double getAngle() { 
-        return (rotationEncoder.getAbsolutePosition().getValueAsDouble() * 360) - angularOffset; 
+        return rotationEncoder.getAbsolutePosition().getValueAsDouble() * 360; 
+    }
+    public double getRawAngle(){
+        return rotationEncoder.getAbsolutePosition().getValueAsDouble();
     }
     public Rotation2d getRotation2d() { 
         return Rotation2d.fromDegrees(getAngle()); 
