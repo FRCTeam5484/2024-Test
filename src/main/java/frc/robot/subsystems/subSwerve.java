@@ -1,6 +1,8 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -49,28 +51,23 @@ public class subSwerve extends SubsystemBase {
   private final swerveModule rearLeftModule = new swerveModule(kRearLeftDrivingCanId,kRearLeftTurningCanId,kRearLeftCANcoder,kRearLeftOffset);
   private final swerveModule rearRightModule = new swerveModule(kRearRightDrivingCanId,kRearRightTurningCanId,kRearRightCANcoder,kRearRightOffset);
   
-  private final AHRS gyro;
+  private final Pigeon2 gyro;
   public SwerveDriveOdometry odometry;
 
   public subSwerve() {
-    gyro = new AHRS(SPI.Port.kMXP);
+    gyro = new Pigeon2(1);
+    gyro.getConfigurator().apply(new Pigeon2Configuration());
+    gyro.setYaw(0);
+
     odometry = new SwerveDriveOdometry(
       moduleConstants.kDriveKinematics,
-      Rotation2d.fromDegrees(0),
+      gyro.getRotation2d(),
       new SwerveModulePosition[] {
         frontLeftModule.getPosition(),
         frontRightModule.getPosition(),
         rearLeftModule.getPosition(),
         rearRightModule.getPosition()
       });
-    new Thread(() -> {
-      try {
-        Thread.sleep(1000);
-        gyro.reset();
-        //gyro..calibrate();
-        gyro.zeroYaw();
-      } catch (Exception e) { }
-    }).start();
 
     /* 
     AutoBuilder.configureHolonomic(
@@ -174,17 +171,14 @@ public class subSwerve extends SubsystemBase {
   }
 
   public void zeroHeading() { gyro.reset(); }
-  public double getHeading() { return Math.IEEEremainder(gyro.getAngle(), 360); }
-  public double getRoll() { return gyro.getRoll(); }
-  public double getPitch() { return -gyro.getPitch(); }
-  public Rotation2d getRotation2d() { return Rotation2d.fromDegrees(getHeading()); }
+  public Rotation2d getRotation2d() { return gyro.getRotation2d();}
   public ChassisSpeeds getChassisSpeeds(){ return moduleConstants.kDriveKinematics.toChassisSpeeds(frontLeftModule.getState(), frontRightModule.getState(), rearLeftModule.getState(), rearRightModule.getState());}
 
 
   @Override
   public void periodic() {
     updateOdometry();
-    SmartDashboard.putNumber("Heading", getHeading());
+    SmartDashboard.putNumber("Heading", gyro.getRotation2d().getDegrees() );
     SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
     //SmartDashboard.putNumber("Robot Roll", getRoll());
     //SmartDashboard.putNumber("Robot Pitch", getPitch());
