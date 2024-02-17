@@ -24,7 +24,7 @@
               "_showGlyph": false
             }
           },
-          "0,1": {
+          "0,2": {
             "size": [
               4,
               1
@@ -37,7 +37,7 @@
               "_showGlyph": false
             }
           },
-          "0,2": {
+          "0,1": {
             "size": [
               4,
               1
@@ -50,7 +50,7 @@
               "_showGlyph": false
             }
           },
-          "0,3": {
+          "6,4": {
             "size": [
               3,
               1
@@ -63,7 +63,7 @@
               "_showGlyph": false
             }
           },
-          "3,3": {
+          "9,4": {
             "size": [
               3,
               1
@@ -76,7 +76,7 @@
               "_showGlyph": false
             }
           },
-          "0,4": {
+          "6,5": {
             "size": [
               3,
               1
@@ -89,7 +89,7 @@
               "_showGlyph": false
             }
           },
-          "3,4": {
+          "9,5": {
             "size": [
               3,
               1
@@ -102,7 +102,7 @@
               "_showGlyph": false
             }
           },
-          "0,5": {
+          "6,6": {
             "size": [
               3,
               1
@@ -115,7 +115,7 @@
               "_showGlyph": false
             }
           },
-          "3,5": {
+          "9,6": {
             "size": [
               3,
               1
@@ -128,7 +128,7 @@
               "_showGlyph": false
             }
           },
-          "0,6": {
+          "6,7": {
             "size": [
               3,
               1
@@ -141,7 +141,7 @@
               "_showGlyph": false
             }
           },
-          "3,6": {
+          "9,7": {
             "size": [
               3,
               1
@@ -150,6 +150,45 @@
               "_type": "Text View",
               "_source0": "network_table:///SmartDashboard/Back Right Angle",
               "_title": "Back Right Angle",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "4,0": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Shooter Velocity",
+              "_title": "Shooter Velocity",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "4,1": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Shot Angle Position",
+              "_title": "Shot Angle Position",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "4,2": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Turret Position",
+              "_title": "Turret Position",
               "_glyph": 148,
               "_showGlyph": false
             }
@@ -172,9 +211,9 @@
     }
   ],
   "windowGeometry": {
-    "x": 296.0,
-    "y": 96.0,
-    "width": 1668.0,
+    "x": -5.0,
+    "y": 228.0,
+    "width": 2049.0,
     "height": 941.0
   }
 }

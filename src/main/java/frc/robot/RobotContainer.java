@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -27,18 +29,23 @@ public class RobotContainer {
           () -> MathUtil.applyDeadband(driverOne.getLeftY(), 0.01),
           () -> MathUtil.applyDeadband(driverOne.getLeftX(), 0.01),
           () -> MathUtil.applyDeadband(driverOne.getRightX(), 0.01)));
+
+    driverOne.a().onTrue(new InstantCommand(() -> swerve.zeroHeading()));
   }
 
   private void addAutoOptions(){
-    chooser.setDefaultOption("Do Nothing", new InstantCommand());
+    chooser = AutoBuilder.buildAutoChooser();
+    //chooser.setDefaultOption("Do Nothing", new InstantCommand());
     SmartDashboard.putData("Auto Options", chooser);
   }
 
   public Command getAutonomousCommand() {
-    try { return chooser.getSelected(); } 
-    catch (NullPointerException ex) { 
-      DriverStation.reportError("auto choose NULL somewhere in getAutonomousCommand in RobotContainer.java", null);
-      return new InstantCommand();
-    }
+    return chooser.getSelected();
+    //return new PathPlannerAuto("Test Auto 1");
+    //try { return chooser.getSelected(); } 
+    //catch (NullPointerException ex) { 
+    //  DriverStation.reportError("auto choose NULL somewhere in getAutonomousCommand in RobotContainer.java", null);
+    //  return new InstantCommand();
+    //}
   }
 }

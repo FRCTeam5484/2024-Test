@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -25,7 +24,7 @@ import frc.robot.classes.moduleConstants;
 import frc.robot.classes.swerveModule;
 
 public class subSwerve extends SubsystemBase {
-  
+
   public static final double kFrontLeftOffset = 0.9348;
   public static final double kFrontRightOffset = 0.5620;
   public static final double kRearLeftOffset = 0.5337;
@@ -68,33 +67,27 @@ public class subSwerve extends SubsystemBase {
         rearLeftModule.getPosition(),
         rearRightModule.getPosition()
       });
-
-    /* 
-    AutoBuilder.configureHolonomic(
-                this::getPose, // Robot pose supplier
-                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-                new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                        new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                        new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
-                        4.5, // Max module speed, in m/s
-                        0.4, // Drive base radius in meters. Distance from robot center to furthest module.
-                        new ReplanningConfig() // Default path replanning config. See the API for the options here
-                ),
-                () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red alliance
-                    // This will flip the path being followed to the red side of the field.
-                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                },
-                this // Reference to this subsystem to set requirements
-        );*/
+      AutoBuilder.configureHolonomic(
+        this::getPose,
+        this::resetPose,
+        this::getChassisSpeeds,
+        this::driveRobotRelative,
+        new HolonomicPathFollowerConfig( 
+                new PIDConstants(5.0, 0.0, 0.0),
+                new PIDConstants(5.0, 0.0, 0.0),
+                4.5,
+                0.4,
+                new ReplanningConfig()
+        ),
+        () -> {
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+        },
+        this
+      );
   }
 
   public Pose2d getPose() { return odometry.getPoseMeters(); }
@@ -173,6 +166,7 @@ public class subSwerve extends SubsystemBase {
   public void zeroHeading() { gyro.reset(); }
   public Rotation2d getRotation2d() { return gyro.getRotation2d();}
   public ChassisSpeeds getChassisSpeeds(){ return moduleConstants.kDriveKinematics.toChassisSpeeds(frontLeftModule.getState(), frontRightModule.getState(), rearLeftModule.getState(), rearRightModule.getState());}
+  public void driveRobotRelative(ChassisSpeeds chassisSpeeds) { this.drive(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond); }
 
 
   @Override
